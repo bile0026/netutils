@@ -1,11 +1,14 @@
 """Configuration conversion methods for different network operating systems."""
 
 import typing as t
+import xml.etree.ElementTree as ET
+
 
 from netutils.config.utils import _open_file_config
 
 conversion_map: t.Dict[str, t.List[str]] = {
     "paloalto_panos": ["paloalto_panos_brace_to_set"],
+    "calix_calixos": ["calix_calixos_cli_to_xml", "calix_calixos_xml_to_cli"],
 }
 
 
@@ -92,3 +95,85 @@ def paloalto_panos_brace_to_set(cfg: str, cfg_type: str = "file") -> str:
             cfg_string += "\n"
 
     return cfg_string
+
+
+def calix_calixos_xml_to_cli(cfg: str, cfg_type: str = "file") -> str:
+    r"""Convert Calix XML Configuration to CLI Format.
+
+    Args:
+        cfg: Configuration as a string
+        cfg_type: A string that is effectively a choice between `file` and `string`. Defaults to `file`.
+
+    Returns:
+        str: Converted configuration as a string.
+
+    Examples:
+    >>> config = '''
+    ...     <config>
+    ...         <interface>
+    ...             <gigabitethernet>
+    ...             <name>1/1/1</name>
+    ...             <description>Example interface</description>
+    ...             <ip>
+    ...                 <address>
+    ...                 <ip-address>192.168.1.10</ip-address>
+    ...                 <subnet-mask>255.255.255.0</subnet-mask>
+    ...                 </address>
+    ...             </ip>
+    ...             <shutdown>false</shutdown>
+    ...             </gigabitethernet>
+    ...         </interface>
+    ...      </config>'''
+    >>> calix_calixos_xml_to_cli(cfg=config, cfg_type='string') == \
+    ... '''interface
+    ...   gigabitethernet
+    ...     name 1/1/1
+    ...     description Example interface
+    ...     ip
+    ...       address
+    ...         ip-address 192.168.1.10
+    ...         subnet-mask 255.255.255.0
+    ...     shutdown false'''
+    True
+    """
+    cli_config: str = ""
+
+    if cfg_type not in ["file", "string"]:
+        raise ValueError("The variable `cfg_type` must be either `file` or `string`.")
+    if cfg_type == "file":
+        xml_config = _open_file_config(cfg)
+    else:
+        xml_config = cfg
+
+    def parse_element(element, indent):
+        lines = []
+        tag_name = element.tag
+        text = element.text.strip() if element.text else ""
+
+        if tag_name == "config":
+            pass
+        elif tag_name == "exit":
+            lines.append(indent[:-2] + "exit")
+        elif tag_name == "no":
+            lines.append(indent[:-2] + "no " + text)
+        else:
+            lines.append(indent[:-2] + tag_name + (" " + text if text else ""))
+
+        for child in element:
+            child_lines = parse_element(child, indent + "  ")
+            lines.extend(child_lines)
+
+        return lines
+
+    try:
+        xml_root = ET.fromstring(xml_config)
+    except ET.ParseError as parse_error:
+        print("Error parsing XML configuration:", str(parse_error))
+        return ""
+
+    config_element = ET.Element("config")
+    config_element.extend(xml_root)
+
+    cli_lines = parse_element(config_element, "")
+    cli_config = "\n".join(cli_lines)
+    return cli_config

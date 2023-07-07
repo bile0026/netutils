@@ -6,7 +6,7 @@ import typing as t
 from collections import namedtuple
 
 from netutils.banner import normalise_delimiter_caret_c
-from netutils.config.conversion import paloalto_panos_brace_to_set
+from netutils.config.conversion import paloalto_panos_brace_to_set, calix_calixos_xml_to_cli
 
 ConfigLine = namedtuple("ConfigLine", "config_line,parents")
 
@@ -1504,6 +1504,87 @@ class PaloAltoNetworksConfigParser(BaseSpaceConfigParser):
                     _needs_conversion = True
         if _needs_conversion:
             converted_config = paloalto_panos_brace_to_set(cfg=self.config, cfg_type="string")
+            list_config = converted_config.splitlines()
+            self.generator_config = (line for line in list_config)
+
+        # build config relationships
+        for line in self.generator_config:
+            if not line[0].isspace():
+                self._current_parents = ()
+                if self.is_banner_start(line):
+                    line = self._build_banner(line)  # type: ignore
+            else:
+                previous_config = self.config_lines[-1]
+                self._current_parents = (previous_config.config_line,)
+                self.indent_level = self.get_leading_space_count(line)
+                if not self.is_banner_start(line):
+                    line = self._build_nested_config(line)  # type: ignore
+                else:
+                    line = self._build_banner(line)  # type: ignore
+                    if line is not None and line[0].isspace():
+                        line = self._build_nested_config(line)  # type: ignore
+                    else:
+                        self._current_parents = ()
+
+            if line is None:
+                break
+            elif self.is_banner_start(line):
+                line = self._build_banner(line)  # type: ignore
+
+            self._update_config_lines(line)
+        return self.config_lines
+
+
+class CalixOSConfigParser(BaseSpaceConfigParser):
+    """Calix config parser."""
+
+    comment_chars: t.List[str] = []
+    banner_start: t.List[str] = []
+    banner_end = ""
+
+    def build_config_relationship(self) -> t.List[ConfigLine]:  # pylint: disable=too-many-branches
+        r"""Parse text of config lines and find their parents.
+
+        Examples:
+            >>> config = (
+            ...     "product\n"
+            ...     "    version AXOS-R23.1.0\n"
+            ...     "    schema-version 34.0.0\n"
+            ...     "  system\n"
+            ...     "    ip\n"
+            ...     "      default-domain\n"
+            ...     "        domain-name example.com\n"
+            ...     "    hostname CALIX1\n"
+            ...     "    location Atlantis\n"
+            ...     "    contact Network Team\n"
+            ... )
+            >>> config_tree = CalixOSConfigParser(config)
+            >>> config_tree.build_config_relationship() == \
+            ... [
+            ...     ConfigLine(config_line="product", parents=()),
+            ...     ConfigLine(config_line="    version AXOS-R23.1.0", parents=("product",)),
+            ...     ConfigLine(config_line="    schema-version 34.0.0", parents=("product",)),
+            ...     ConfigLine(config_line="  system", parents=("product",)),
+            ...     ConfigLine(config_line="    ip", parents=("product", "  system")),
+            ...     ConfigLine(config_line="      default-domain", parents=("product", "  system", "    ip")),
+            ...     ConfigLine(config_line="        domain-name example.com", parents=("product", "  system", "    ip","      default-domain")),
+            ...     ConfigLine(config_line="    hostname CALIX1", parents=("product", "  system")),
+            ...     ConfigLine(config_line="    location Atlantis", parents=("product", "  system")),
+            ...     ConfigLine(config_line="    contact Network Team", parents=("product", "  system")),
+            ... ]
+            True
+        """
+
+        # assume configuration does not need conversion
+        _needs_conversion = False
+
+        # if config is in palo brace format, convert to set
+        if self.config_lines_only is not None:
+            for line in self.config_lines_only:
+                if line.startswith("<") or line.endswith(">"):
+                    _needs_conversion = True
+        if _needs_conversion:
+            converted_config = calix_calixos_xml_to_cli(cfg=self.config, cfg_type="string")
             list_config = converted_config.splitlines()
             self.generator_config = (line for line in list_config)
 
