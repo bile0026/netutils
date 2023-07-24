@@ -16,6 +16,7 @@
 | feature_compliance | netutils.config.compliance.feature_compliance |
 | find_unordered_cfg_lines | netutils.config.compliance.find_unordered_cfg_lines |
 | section_config | netutils.config.compliance.section_config |
+| calix_calixos_xml_to_cli | netutils.config.conversion.calix_calixos_xml_to_cli |
 | paloalto_panos_brace_to_set | netutils.config.conversion.paloalto_panos_brace_to_set |
 | fqdn_to_ip | netutils.dns.fqdn_to_ip |
 | is_fqdn_resolvable | netutils.dns.is_fqdn_resolvable |

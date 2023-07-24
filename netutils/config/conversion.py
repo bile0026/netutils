@@ -8,7 +8,7 @@ from netutils.config.utils import _open_file_config
 
 conversion_map: t.Dict[str, t.List[str]] = {
     "paloalto_panos": ["paloalto_panos_brace_to_set"],
-    "calix_calixos": ["calix_calixos_cli_to_xml", "calix_calixos_xml_to_cli"],
+    "calix_calixos": ["calix_calixos_xml_to_cli"],
 }
 
 

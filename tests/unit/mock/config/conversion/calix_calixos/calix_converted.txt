@@ -1,0 +1,290 @@
+product
+  version AXOS-R23.1.0
+  schema-version 34.0.0
+shelf
+  shelf-id 1
+  slot
+    slot-id 1
+    interface
+      ethernet
+        port x1
+        description pon-int-1
+        mtu 9000
+        duplex full
+        speed 10Gbs
+        arp
+          arp-announce any
+        samplingPoint
+          name interface-ethernet-sampler
+        role lag
+        system-lag la1
+        shutdown false
+      ethernet
+        port x2
+        description pon-int-2
+        mtu 9000
+        duplex full
+        speed 10Gbs
+        arp
+          arp-announce any
+        samplingPoint
+          name interface-ethernet-sampler
+        role lag
+        system-lag la1
+        shutdown false
+      ethernet
+        port x3
+        samplingPoint
+          name interface-ethernet-sampler
+      ethernet
+        port x4
+        samplingPoint
+          name interface-ethernet-sampler
+      pon
+        port xp1
+        if-module-id 1
+        if-module-type XG401
+        transport-type xgspon-10g
+        samplingPoint
+          name pon-util-sampler
+        shutdown false
+      pon
+        port xp2
+        if-module-id 1
+        if-module-type XG401
+        samplingPoint
+          name pon-util-sampler
+      pon
+        port xp3
+        if-module-id 1
+        if-module-type XG401
+        transport-type xgspon-10g
+        samplingPoint
+          name pon-util-sampler
+        shutdown false
+      pon
+        port xp4
+        if-module-id 1
+        if-module-type XG401
+        samplingPoint
+          name pon-util-sampler
+      pon
+        port xp5
+        if-module-id 1
+        if-module-type XG401
+        transport-type xgspon-10g
+        samplingPoint
+          name pon-util-sampler
+        shutdown false
+      pon
+        port xp6
+        if-module-id 1
+        if-module-type XG401
+        samplingPoint
+          name pon-util-sampler
+      pon
+        port xp7
+        if-module-id 1
+        if-module-type XG401
+        transport-type xgspon-10g
+        samplingPoint
+          name pon-util-sampler
+        shutdown false
+      pon
+        port xp8
+        if-module-id 1
+        if-module-type XG401
+        samplingPoint
+          name pon-util-sampler
+      pon
+        port xp9
+        if-module-id 2
+        if-module-type XG401
+        transport-type xgspon-10g
+        samplingPoint
+          name pon-util-sampler
+        shutdown false
+      pon
+        port xp10
+        if-module-id 2
+        if-module-type XG401
+        samplingPoint
+          name pon-util-sampler
+      pon
+        port xp11
+        if-module-id 2
+        if-module-type XG401
+        transport-type xgspon-10g
+        samplingPoint
+          name pon-util-sampler
+        shutdown false
+      pon
+        port xp12
+        if-module-id 2
+        if-module-type XG401
+        samplingPoint
+          name pon-util-sampler
+      pon
+        port xp13
+        if-module-id 2
+        if-module-type XG401
+        transport-type xgspon-10g
+        samplingPoint
+          name pon-util-sampler
+        shutdown false
+      pon
+        port xp14
+        if-module-id 2
+        if-module-type XG401
+        samplingPoint
+          name pon-util-sampler
+      pon
+        port xp15
+        if-module-id 2
+        if-module-type XG401
+        transport-type xgspon-10g
+        samplingPoint
+          name pon-util-sampler
+        shutdown false
+      pon
+        port xp16
+        if-module-id 2
+        if-module-type XG401
+        samplingPoint
+          name pon-util-sampler
+    power-monitor A_B
+    samplingPoint
+      sname sysinfo
+      sysinfo sys-info-sampler
+    type XGS
+    if-module
+      if-module-id 1
+      type XG401
+    if-module
+      if-module-id 2
+      type XG401
+system
+  ip
+    default-domain
+      domain-name example.com
+  ipv6
+    route
+      destination-prefix 2001:0db8:85a3::/64
+      next-hop 2001:0db8:85a3::1
+  hostname CALIX1
+  location Atlantis
+  contact Network Team
+  ntp
+    server
+      id 1
+      address 2001:0db8:85a3::3
+    server
+      id 2
+  cli
+    banner **********************************************************
+* WARNING *
+* This network device is private property of Stargate *
+* Network. Unauthorized access is strictly prohibited. *
+* If you are unauthorized or do not consent to Stargate *
+* Network monitoring of usage disconnect NOW. *
+**********************************************************
+
+****************
+* RANDOMCHARS *
+****************
+  environment-alarm
+    input
+      name al1
+    input
+      name al2
+    input
+      name al3
+  aaa
+    authentication-order radius-if-up-else-local
+    user
+      name local_admin
+      password 4f34f8e4c6b8d8e12d6e3c0373790c2c3d49b40d3b0e3f50efb2e6f3b618c722
+      role admin
+    radius
+      server
+        host 2001:0db8:85a3::1
+        secret JGx5Q0tnTThUbHZ5dFJubHVuZw==
+      server
+        host 2001:0db8:85a3::2
+        secret JGx5Q0tnTThUbHZ5dFJubHVuZw==
+  ipdr
+    interface v888
+    doc-id-format docsis
+    collector
+      collector-id 1
+      collector-ip 2001:0db8:85a3::4
+      priority 1
+      collector-name ippv17
+    collector
+      collector-id 2
+      collector-ip 2001:0db8:85a3::5
+      priority 1
+      collector-name ippv18
+    streaming-session
+      session-id 1
+      session-name SAMIS-TYPE-1
+      collector
+        collector-id 1
+      collector
+        collector-id 2
+      admin-state enable
+  tcpdump
+    seconds 255
+  vlan
+    vlan-id 100
+    l2-dhcp-profile DHCP-SNOOP
+    source-verify ENABLED
+    ipv6-source-verify ENABLED
+    mff ENABLED
+  vlan
+    vlan-id 200
+    l2-dhcp-profile DHCP-SNOOP
+    ipv6-source-verify ENABLED
+    mff ENABLED
+    ripv2-mode flood
+  vlan
+    vlan-id 300
+    l2-dhcp-profile DHCP-SNOOP
+    source-verify ENABLED
+    ipv6-source-verify ENABLED
+    mff ENABLED
+  vlan
+    vlan-id 400
+    l2-dhcp-profile DHCP-SNOOP
+    ipv6-source-verify ENABLED
+  vlan
+    vlan-id 888
+  vlan
+    vlan-id 999
+interface
+  lag
+    group la1
+    description pon-unit-1
+    lacp-mode active
+    mtu 9000
+    samplingPoint
+      name interface-lag-sampler
+    role inni
+    transport-service-profile SYSTEM_TSP
+    shutdown false
+  vlan
+    vlan-id 888
+    description management
+    access-group
+      ipv6-acl V6-MGMT-ACL
+    ipv6
+      address
+        ip 2001:0db8:85a3::/64
+    shutdown false
+  vlan
+    vlan-id 999
+  craft
+    id 1
+  wifi
+    id wlan1
+    shutdown true

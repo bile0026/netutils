@@ -1539,7 +1539,7 @@ class CalixOSConfigParser(BaseSpaceConfigParser):
     """Calix config parser."""
 
     comment_chars: t.List[str] = []
-    banner_start: t.List[str] = []
+    banner_start: t.List[str] = ["banner"]
     banner_end = ""
 
     def build_config_relationship(self) -> t.List[ConfigLine]:  # pylint: disable=too-many-branches

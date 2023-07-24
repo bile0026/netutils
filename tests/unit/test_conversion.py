@@ -5,6 +5,7 @@ import os
 import pytest
 from netutils.config.conversion import (
     paloalto_panos_brace_to_set,
+    calix_calixos_xml_to_cli,
     conversion_map,
 )
 
@@ -20,11 +21,14 @@ for network_os in list(conversion_map.keys()):
         conversion_files.append([_file, network_os])
 
 
-@pytest.mark.parametrize("_file", conversion_files)
-def test_config_conversion(_file, get_text_data):  # pylint: disable=redefined-outer-name
-    truncate_file = os.path.join(MOCK_DIR, _file[0][: -len(TXT_FILE)])
+@pytest.mark.parametrize("_file, network_os", conversion_files)
+def test_config_conversion(_file, network_os, get_text_data):  # pylint: disable=redefined-outer-name
+    truncate_file = os.path.join(MOCK_DIR, _file[: -len(TXT_FILE)])
 
-    sent_cfg = get_text_data(os.path.join(MOCK_DIR, _file[0]))
-    converted_cfg = paloalto_panos_brace_to_set(cfg=sent_cfg, cfg_type="string")
+    sent_cfg = get_text_data(os.path.join(MOCK_DIR, _file))
+    if network_os == "paloalto_panos":
+        converted_cfg = paloalto_panos_brace_to_set(cfg=sent_cfg, cfg_type="string")
+    if network_os == "calix_calixos":
+        converted_cfg = calix_calixos_xml_to_cli(cfg=sent_cfg, cfg_type="string")
     received_data = get_text_data(truncate_file + "_converted.txt")
     assert converted_cfg == received_data
