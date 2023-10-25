@@ -1,7 +1,7 @@
 """Tasks for use with Invoke."""
 import os
 import sys
-from distutils.util import strtobool
+from distutils.util import strtobool  # pylint: disable=W0402
 
 from invoke import task
 
@@ -31,7 +31,7 @@ PYPROJECT_CONFIG = toml.load("pyproject.toml")
 TOOL_CONFIG = PYPROJECT_CONFIG["tool"]["poetry"]
 
 # Can be set to a separate Python version to be used for launching or building image
-PYTHON_VER = os.getenv("PYTHON_VER", "3.9")
+PYTHON_VER = os.getenv("PYTHON_VER", "3.11")
 # Name of the docker image/image
 IMAGE_NAME = os.getenv("IMAGE_NAME", TOOL_CONFIG["name"])
 # Tag for the image
@@ -178,7 +178,7 @@ def pylint(context, local=INVOKE_LOCAL):
         context (obj): Used to run specific commands
         local (bool): Define as `True` to execute locally
     """
-    exec_cmd = 'find . -name "*.py" | grep -v "tests/unit/mock" | xargs pylint'
+    exec_cmd = 'find . -name "*.py" | grep -vE "(tests/unit/mock|netutils/data_files)" | xargs pylint'
     run_cmd(context, exec_cmd, local)
 
 
